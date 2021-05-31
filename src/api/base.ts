@@ -3,7 +3,7 @@
  */
  const base = {    
     sq: 'https://xxxx111111.com/api/v1',    
-    bd: 'http://localhost:8080//api'
+    bd: 'http://localhost:8000/api'
 }
 
 export default base;

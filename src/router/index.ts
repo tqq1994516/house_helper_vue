@@ -18,7 +18,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/:catchAll(.*)',
     name: '/404',
     component: () => import('../views/404.vue')
-  }
+  },
+  {
+    path: '/4',
+    name: 'client',
+    component: () => import('../views/client.vue')
+  },
 ]
 
 const router = createRouter({

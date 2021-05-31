@@ -8,8 +8,8 @@
  
  const menus = {    
      // 一级菜单列表    
-     lv1_menus () {        
-         return instance.get(`${base.bd}/menus/lv1_menus/`);    
+     menus (config:any) {        
+         return instance.get(`${base.bd}/menus/menus/`, config);    
      },    
     //  // 新闻详情,演示    
     //  articleDetail (id, params) {        

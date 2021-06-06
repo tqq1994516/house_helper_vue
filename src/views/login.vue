@@ -34,7 +34,13 @@
               </el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="onLogin">登录</el-button>
+              <el-button
+                type="primary"
+                @click="onLogin('form')"
+                :loading="login_loading"
+                :disabled="login_button"
+                >登录</el-button
+              >
               <el-button type="warning" @click="toRegister">注册</el-button>
             </el-form-item>
           </el-form>
@@ -47,36 +53,98 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import api from "@/api/api";
+import { ElMessage } from "element-plus";
 export default defineComponent({
   name: "login",
   data() {
+    const checkUsername = (rule: any, value: any, callback: any) => {
+      if (!value) {
+        callback(new Error("请输入用户名"));
+        this.login_btn_true();
+      } else if (value.length < 3 || value.length > 20) {
+        callback(new Error("长度在 3 到 20 个字符"));
+        this.login_btn_true();
+      } else {
+        callback();
+        this.login_btn_false();
+      }
+    };
+    const checkPassword = (rule: any, value: any, callback: any) => {
+      if (!value) {
+        callback(new Error("请输入密码"));
+        this.login_btn_true();
+      } else if (value.length < 6 || value.length > 20) {
+        callback(new Error("长度在 6 到 20 个字符"));
+        this.login_btn_true();
+      } else {
+        callback();
+        this.login_btn_false();
+      }
+    };
     return {
       form: {
         username: "",
         password: "",
       },
       rules: {
-        username: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
-          { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" },
-        ],
-        password: [{ required: true, message: "请输入密码", trigger: "blur" }],
+        username: [{ validate: checkUsername, trigger: "blur" }],
+        password: [{ validate: checkPassword, trigger: "blur" }],
       },
-      err: Object,
+      message: "",
+      login_button: false,
+      login_loading: false,
     };
   },
   methods: {
-    onLogin: function () {
-      api.login
-        .login({ username: this.form.username, password: this.form.password },
-        )
-        .then((res: any) => {
-          this.err = eval(res.data);
-        });
+    onLogin(formName: any) {
+      (this.$refs[formName] as HTMLFormElement).validate((valid: any) => {
+        if (valid) {
+          api.login
+            .login({
+              username: this.form.username,
+              password: this.form.password,
+            })
+            .then((res: any) => {
+              const data = eval(res);
+              this.message = data.data.message;
+              this.sucessTip();
+            })
+            .catch((res: any) => {
+              const data = eval(res);
+              this.message = data.data.message;
+              this.failTip();
+            });
+        }
+      });
     },
-    toRegister: function () {
-      this.$router.push({ path: '/register'})
-    }
+    toRegister() {
+      this.$router.push({ path: "/register" });
+    },
+    toIndex() {
+      this.login_loading = true;
+      this.$router.push({ path: "/index" });
+    },
+    sucessTip() {
+      ElMessage.success({
+        message: this.message,
+        type: "success",
+        center: true,
+        onClose: this.toIndex,
+      });
+    },
+    failTip() {
+      ElMessage.error({
+        message: this.message,
+        type: "error",
+        center: true,
+      });
+    },
+    login_btn_true() {
+      this.login_button = true;
+    },
+    login_btn_false() {
+      this.login_button = false;
+    },
   },
   mounted() {
     (async () =>

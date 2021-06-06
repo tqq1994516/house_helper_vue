@@ -85,6 +85,7 @@
                 type="primary"
                 @click="onRegister('form')"
                 :disabled="register_button"
+                :loading="register_loading"
                 >注册</el-button
               >
               <el-button type="warning" @click="toLogin">返回登录</el-button>
@@ -101,9 +102,6 @@ import { defineComponent } from "vue";
 import api from "@/api/api";
 import { ElMessage } from "element-plus";
 export default defineComponent({
-  $refs: {
-    validate: HTMLFormElement,
-  },
   name: "register",
   data() {
     let reg_chinese = /\u4e00-\u9fa5/;
@@ -272,6 +270,7 @@ export default defineComponent({
       sex_checked: 0,
       message: "",
       register_button: false,
+      register_loading: false,
     };
   },
   methods: {
@@ -312,6 +311,7 @@ export default defineComponent({
       });
     },
     toLogin() {
+      this.register_loading = true;
       this.$router.push({ path: "/login" });
     },
     sucessTip() {

@@ -134,10 +134,10 @@
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="currentPage4"
-          :page-sizes="[100, 200, 300, 400]"
-          :page-size="100"
-          layout="total, prev, pager, next, jumper, ->, sizes"
-          :total="400"
+          :page-sizes="pageSizes"
+          :page-size="currentPageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total"
         >
         </el-pagination>
       </div> </template
@@ -187,6 +187,9 @@ export default defineComponent({
     return {
       currentPage4: 4,
       isClose: false,
+      pageSizes: [10, 20, 30, 40, 50],
+      currentPageSize: 10,
+      total: 0,
       tableData: [
         {
           date: "2016-05-02",

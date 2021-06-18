@@ -2,11 +2,11 @@
   <el-container>
     <el-main>
       <el-row type="flex" justify="center" align="middle">
-        <el-col span="12" offset="6 ">
+        <el-col span=12 offset=6>
           <el-form
-            ref="form"
-            :model="form"
-            :rules="rules"
+            ref="loginForm"
+            :model="loginForm"
+            :rules="loginRules"
             label-width="80px"
             style="
               margin-top: 40%;
@@ -66,8 +66,8 @@
             </el-form-item>
             <el-form-item label="性别" prop="sex">
               <el-radio-group v-model="form.sex">
-                <el-radio label="男"></el-radio>
-                <el-radio label="女"></el-radio>
+                <el-radio label="1">男</el-radio>
+                <el-radio label="2">女</el-radio>
               </el-radio-group>
             </el-form-item>
             <el-form-item label="生日" prop="birthday">
@@ -98,145 +98,208 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, onMounted, ref } from "vue";
 import api from "@/api/api";
 import { ElMessage } from "element-plus";
 export default defineComponent({
   name: "register",
-  data() {
-    let reg_chinese = /\u4e00-\u9fa5/;
-    let reg_email = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
-    let reg_mobile_phone = /^1[356789]\d{9}$/;
+  setup(){
+    const reg_chinese = /[\u4e00-\u9fa5]/;
+    const reg_email = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+    const reg_mobile_phone = /^1[356789]\d{9}$/;
+    const register_button = ref(false)
+    const message = ref("")
+    const register_loading = ref(false)
+    const register_btn_true = () => {
+      register_button.value = true;
+    }
+    const register_btn_false = () => {
+      register_button.value = false;
+    }
+
     const checkUsername = (rule: any, value: any, callback: any) => {
       if (!value) {
         callback(new Error("请输入用户名"));
-        this.register_btn_true();
+        register_btn_true();
       } else if (value.length < 3 || value.length > 20) {
         callback(new Error("长度在 3 到 20 个字符"));
-        this.register_btn_true();
+        register_btn_true();
       } else {
         callback();
-        this.register_btn_false();
+        register_btn_false();
       }
     };
+
     const checkPassword = (rule: any, value: any, callback: any) => {
       if (!value) {
         callback(new Error("请输入密码"));
-        this.register_btn_true();
+        register_btn_true();
       } else if (value.length < 6 || value.length > 20) {
         callback(new Error("长度在 6 到 20 个字符"));
-        this.register_btn_true();
+        register_btn_true();
       } else {
         callback();
-        this.register_btn_false();
+        register_btn_false();
       }
     };
     const checkPassword2 = (rule: any, value: any, callback: any) => {
       if (!value) {
         callback(new Error("请再次输入密码"));
-        this.register_btn_true();
+        register_btn_true();
       } else if (value.length < 6 || value.length > 20) {
         callback(new Error("长度在 6 到 20 个字符"));
-        this.register_btn_true();
-      } else if (this.password != value) {
+        register_btn_true();
+      } else if (loginForm.value.password != value) {
         callback(new Error("两次输入密码不一致"));
-        this.register_btn_true();
+        // console.log(loginForm.value.password, value)
+        register_btn_true();
       } else {
         callback();
-        this.register_btn_false();
+        register_btn_false();
       }
     };
     const checkFirstName = (rule: any, value: any, callback: any) => {
-      if (!value) {
-        callback(new Error("请输入姓"));
-        this.register_btn_true();
-      } else if (!reg_chinese.test(value)) {
+      if (!reg_chinese.test(value)) {
         callback(new Error("请输入中文"));
-        this.register_btn_true();
+        register_btn_true();
       } else if (value.length < 1 || value.length > 10) {
         callback(new Error("长度在 1 到 10 个字符"));
-        this.register_btn_true();
+        register_btn_true();
       } else {
         callback();
-        this.register_btn_false();
+        register_btn_false();
       }
     };
     const checkLastName = (rule: any, value: any, callback: any) => {
-      if (!value) {
-        callback(new Error("请输入名"));
-        this.regeister_btn_true();
-      } else if (!reg_chinese.test(value)) {
+      if (!reg_chinese.test(value)) {
         callback(new Error("请输入中文"));
-        this.register_btn_true();
+        register_btn_true();
       } else if (value.length < 1 || value.length > 10) {
         callback(new Error("长度在 1 到 10 个字符"));
-        this.register_btn_true();
+        register_btn_true();
       } else {
         callback();
-        this.register_btn_false();
+        register_btn_false();
       }
     };
     const checkEmail = (rule: any, value: any, callback: any) => {
       if (!value) {
         callback(new Error("请输入邮箱"));
-        this.register_btn_true();
+        register_btn_true();
       } else if (!reg_email.test(value)) {
         callback(new Error("请输入正确的邮箱格式"));
-        this.register_btn_true();
+        register_btn_true();
       } else if (value.length < 1 || value.length > 30) {
         callback(new Error("长度在 1 到 30 个字符"));
-        this.register_btn_true();
+        register_btn_true();
       } else {
         callback();
-        this.register_btn_false();
+        register_btn_false();
       }
     };
-    const checkSex = (rule: any, value: any, callback: any) => {
-      if (!value) {
-        callback(new Error("请选择性别"));
-        this.register_btn_true();
-      } else {
-        callback();
-        this.register_btn_false();
-      }
-    };
+    // const checkSex = (rule: any, value: any, callback: any) => {
+    //   if (!value) {
+    //     callback(new Error("请选择性别"));
+    //     this.register_btn_true();
+    //   } else {
+    //     callback();
+    //     this.register_btn_false();
+    //   }
+    // };
     const checkMobliePhone = (rule: any, value: any, callback: any) => {
       if (!value) {
-        callback(new Error("请输入手机号入"));
-        this.register_btn_true();
+        callback(new Error("请输入手机号"));
+        register_btn_true();
       } else if (!reg_mobile_phone.test(value)) {
         callback(new Error("请输入正确的手机号格式"));
-        this.register_btn_true();
+        register_btn_true();
       } else if (value.length != 11) {
         callback(new Error("请输入正确的手机号格式"));
-        this.register_btn_true();
+        register_btn_true();
       } else {
         callback();
-        this.register_btn_false();
+        register_btn_false();
       }
     };
     const checkBirthday = (rule: any, value: any, callback: any) => {
       if (!value) {
         callback(new Error("请选择出生日期"));
-        this.register_btn_true();
+        register_btn_true();
       } else {
         callback();
-        this.register_btn_false();
+        register_btn_false();
       }
     };
-    return {
-      form: {
-        username: "",
-        password: "",
-        password2: "",
-        first_name: "",
-        last_name: "",
-        email: "",
-        sex: "",
-        mobile_phone: 0,
-        birthday: "",
-      },
-      rules: {
+    const onRegister = (formName: any) => {
+      formName.validate((valid: any) => {
+        if (valid) {
+          // if (loginForm.sex == "1") {
+          //   this.sex_checked = 1;
+          // } else {
+          //   this.sex_checked = 2;
+          // }
+          var dateFormat = require("dateformat");
+          loginForm.value.birthday = dateFormat(loginForm.value.birthday, "isoDate");
+          api.register
+            .register({
+              username: loginForm.value.username,
+              password: loginForm.value.password,
+              password2: loginForm.value.password2,
+              first_name: loginForm.value.first_name,
+              last_name: loginForm.value.last_name,
+              email: loginForm.value.email,
+              mobile_phone: loginForm.value.mobile_phone,
+              sex: loginForm.value.sex,
+              birthday: loginForm.value.birthday,
+            })
+            .then((res: any) => {
+              const data = eval(res);
+              message.value = data.data.message;
+              sucessTip();
+            })
+            .catch((res: any) => {
+              const data = eval(res);
+              message.value = data.data.message;
+              failTip();
+            });
+        } else {
+          register_btn_true();
+        }
+      });
+    }
+    const toLogin = () => {
+      register_loading.value = true;
+      this.$router.push({ path: "/login" });
+    }
+    const sucessTip = () => {
+      ElMessage.success({
+        message: message.value,
+        type: "success",
+        center: true,
+        onClose: toLogin,
+      });
+    }
+    const failTip = () => {
+      ElMessage.error({
+        message: message.value,
+        type: "error",
+        center: true,
+      });
+    }
+
+    const loginRef = ref()
+    const loginForm = ref({
+      username: "",
+      password: "",
+      password2: "",
+      first_name: "",
+      last_name: "",
+      email: "",
+      mobile_phone: "",
+      sex: "1",
+      birthday: ""
+    })
+    const loginRules = ref({
         username: [
           {
             validator: checkUsername,
@@ -263,92 +326,32 @@ export default defineComponent({
         ],
         last_name: [{ validator: checkLastName, trigger: "blur" }],
         email: [{ validator: checkEmail, trigger: "blur" }],
-        sex: [{ validator: checkSex, trigger: "blur" }],
+        // sex: [{ validator: checkSex, trigger: "blur" }],
         mobile_phone: [{ validator: checkMobliePhone, trigger: "blur" }],
         birthday: [{ validator: checkBirthday, trigger: "blur" }],
-      },
-      sex_checked: 0,
-      message: "",
-      register_button: false,
-      register_loading: false,
-    };
-  },
-  methods: {
-    onRegister(formName: any) {
-      (this.$refs[formName] as HTMLFormElement).validate((valid: any) => {
-        if (valid) {
-          if (this.form.sex == "男") {
-            this.sex_checked = 1;
-          } else {
-            this.sex_checked = 2;
-          }
-          var dateFormat = require("dateformat");
-          this.form.birthday = dateFormat(this.form.birthday, "isoDate");
-          api.register
-            .register({
-              username: this.form.username,
-              password: this.form.password,
-              first_name: this.form.first_name,
-              last_name: this.form.last_name,
-              email: this.form.email,
-              mobile_phone: this.form.mobile_phone,
-              sex: this.sex_checked,
-              birthday: this.form.birthday,
-            })
-            .then((res: any) => {
-              const data = eval(res);
-              this.message = data.data.message;
-              this.sucessTip();
-            })
-            .catch((res: any) => {
-              const data = eval(res);
-              this.message = data.data.message;
-              this.failTip();
-            });
-        } else {
-          this.register_btn_true();
-        }
-      });
-    },
-    toLogin() {
-      this.register_loading = true;
-      this.$router.push({ path: "/login" });
-    },
-    sucessTip() {
-      ElMessage.success({
-        message: this.message,
-        type: "success",
-        center: true,
-        onClose: this.toLogin,
-      });
-    },
-    failTip() {
-      ElMessage.error({
-        message: this.message,
-        type: "error",
-        center: true,
-      });
-    },
-    register_btn_true() {
-      this.register_button = true;
-    },
-    register_btn_false() {
-      this.register_button = false;
-    },
-  },
-  mounted() {
-    (async () =>
+    })
+    onMounted(() => {
+      (async () =>
       await api.register.register_form(null).then((res: any) => {
         const data = eval(res);
-        this.form.username = data.username;
-        this.form.password = data.password;
-        this.form.first_name = data.first_name;
-        this.form.last_name = data.last_name;
-        this.form.email = data.email;
-        this.form.sex = data.sex;
-        this.form.mobile_phone = data.mobile_phone;
-        this.form.birthday = data.birthday;
+        loginForm.value.username = data.username;
+        loginForm.value.password = data.password;
+        loginForm.value.first_name = data.first_name;
+        loginForm.value.last_name = data.last_name;
+        loginForm.value.email = data.email;
+        loginForm.value.sex = data.sex;
+        loginForm.value.mobile_phone = data.mobile_phone;
+        loginForm.value.birthday = data.birthday;
       }))();
+    })
+    return {
+      loginForm,
+      // sex_checked: 0,
+      message,
+      register_button,
+      register_loading,
+      loginRules
+    }
   },
 });
 </script>

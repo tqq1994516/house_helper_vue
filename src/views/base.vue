@@ -96,32 +96,34 @@
 
 <script lang="ts">
 import api from "@/api/api";
-import { defineComponent } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 export default defineComponent({
   name: "basePage",
-  data() {
-    return {
-      isCollapse: false,
-      menus_count: 0,
-      menus_list: null,
-      activeIndex: "1",
-      isRouter: true,
-    };
-  },
-  methods: {
-    handleOpen(key: string, keyPath: string) {},
-    handleClose(key: string, keyPath: string) {},
-  },
-  mounted() {
-    (async () =>
+  setup(){
+      const isCollapse = ref(false)
+      const menus_count = ref(0)
+      const menus_list = ref(null)
+      const activeIndex = ref("1")
+      const isRouter = ref(true)
+      const handleOpen = (key: string, keyPath: string) => {}
+      const handleClose = (key: string, keyPath: string) => {}
+      onMounted(() => {
+      (async () =>
       await api.menus
-        .menus({ params: { activeIndex: this.activeIndex } })
+        .menus(null)
         .then((res: any) => {
-          this.menus_count = res.data.length - 1;
-          this.menus_list = eval(res.data);
-          this.activeIndex = res.data[res.data.length - 1].activeIndex;
-        }))();
-  },
+          menus_count.value = res.data.length - 1;
+          menus_list.value = eval(res.data);
+          activeIndex.value = res.data[res.data.length - 1].activeIndex;
+        }))()});
+    return {
+      isCollapse,
+      menus_count,
+      menus_list,
+      activeIndex,
+      isRouter,
+    };
+  }
 });
 </script>
 

@@ -4,9 +4,9 @@
       <el-row type="flex" justify="center" align="middle">
         <el-col span=12 offset=6>
           <el-form
-            ref="loginForm"
-            :model="loginForm"
-            :rules="loginRules"
+            ref="registerRef"
+            :model="registerForm"
+            :rules="registerRules"
             label-width="80px"
             style="
               margin-top: 40%;
@@ -22,50 +22,50 @@
           >
             <el-form-item label="用户名" prop="username">
               <el-input
-                v-model="form.username"
+                v-model="registerForm.username"
                 placeholder="请输入用户名"
               ></el-input>
             </el-form-item>
             <el-form-item label="密码" prop="password">
               <el-input
                 type="password"
-                v-model="form.password"
+                v-model="registerForm.password"
                 placeholder="请输入密码"
               ></el-input>
             </el-form-item>
             <el-form-item label="确认密码" prop="password2">
               <el-input
                 type="password"
-                v-model="form.password2"
+                v-model="registerForm.password2"
                 placeholder="请再次输入密码"
               ></el-input>
             </el-form-item>
             <el-form-item label="姓" prop="first_name">
               <el-input
-                v-model="form.first_name"
+                v-model="registerForm.first_name"
                 placeholder="请输入姓"
               ></el-input>
             </el-form-item>
             <el-form-item label="名" prop="last_name">
               <el-input
-                v-model="form.last_name"
+                v-model="registerForm.last_name"
                 placeholder="请输入名"
               ></el-input>
             </el-form-item>
             <el-form-item label="邮箱" prop="email">
               <el-input
-                v-model="form.email"
+                v-model="registerForm.email"
                 placeholder="请输入邮箱"
               ></el-input>
             </el-form-item>
             <el-form-item label="手机号" prop="mobile_phone">
               <el-input
-                v-model="form.mobile_phone"
+                v-model="registerForm.mobile_phone"
                 placeholder="请输入手机号"
               ></el-input>
             </el-form-item>
             <el-form-item label="性别" prop="sex">
-              <el-radio-group v-model="form.sex">
+              <el-radio-group v-model="registerForm.sex">
                 <el-radio label="1">男</el-radio>
                 <el-radio label="2">女</el-radio>
               </el-radio-group>
@@ -75,7 +75,7 @@
                 <el-date-picker
                   type="date"
                   placeholder="选择日期"
-                  v-model="form.birthday"
+                  v-model="registerForm.birthday"
                   style="width: 100%"
                 ></el-date-picker>
               </el-col>
@@ -83,7 +83,7 @@
             <el-form-item>
               <el-button
                 type="primary"
-                @click="onRegister('form')"
+                @click="onRegister"
                 :disabled="register_button"
                 :loading="register_loading"
                 >注册</el-button
@@ -98,12 +98,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from "vue";
+import { defineComponent, onMounted, reactive, ref, unref } from "vue";
 import api from "@/api/api";
 import { ElMessage } from "element-plus";
+import { useRouter } from "vue-router";
 export default defineComponent({
   name: "register",
   setup(){
+    const router = useRouter();
     const reg_chinese = /[\u4e00-\u9fa5]/;
     const reg_email = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
     const reg_mobile_phone = /^1[356789]\d{9}$/;
@@ -149,9 +151,8 @@ export default defineComponent({
       } else if (value.length < 6 || value.length > 20) {
         callback(new Error("长度在 6 到 20 个字符"));
         register_btn_true();
-      } else if (loginForm.value.password != value) {
+      } else if (registerForm.password != value) {
         callback(new Error("两次输入密码不一致"));
-        // console.log(loginForm.value.password, value)
         register_btn_true();
       } else {
         callback();
@@ -197,15 +198,15 @@ export default defineComponent({
         register_btn_false();
       }
     };
-    // const checkSex = (rule: any, value: any, callback: any) => {
-    //   if (!value) {
-    //     callback(new Error("请选择性别"));
-    //     this.register_btn_true();
-    //   } else {
-    //     callback();
-    //     this.register_btn_false();
-    //   }
-    // };
+    const checkSex = (rule: any, value: any, callback: any) => {
+      if (!value) {
+        callback(new Error("请选择性别"));
+        register_btn_true();
+      } else {
+        callback();
+        register_btn_false();
+      }
+    };
     const checkMobliePhone = (rule: any, value: any, callback: any) => {
       if (!value) {
         callback(new Error("请输入手机号"));
@@ -230,27 +231,22 @@ export default defineComponent({
         register_btn_false();
       }
     };
-    const onRegister = (formName: any) => {
-      formName.validate((valid: any) => {
+    const onRegister = () => {
+      unref(registerRef).validate((valid: any) => {
         if (valid) {
-          // if (loginForm.sex == "1") {
-          //   this.sex_checked = 1;
-          // } else {
-          //   this.sex_checked = 2;
-          // }
           var dateFormat = require("dateformat");
-          loginForm.value.birthday = dateFormat(loginForm.value.birthday, "isoDate");
+          registerForm.birthday = dateFormat(registerForm.birthday, "isoDate");
           api.register
             .register({
-              username: loginForm.value.username,
-              password: loginForm.value.password,
-              password2: loginForm.value.password2,
-              first_name: loginForm.value.first_name,
-              last_name: loginForm.value.last_name,
-              email: loginForm.value.email,
-              mobile_phone: loginForm.value.mobile_phone,
-              sex: loginForm.value.sex,
-              birthday: loginForm.value.birthday,
+              username: registerForm.username,
+              password: registerForm.password,
+              password2: registerForm.password2,
+              first_name: registerForm.first_name,
+              last_name: registerForm.last_name,
+              email: registerForm.email,
+              mobile_phone: registerForm.mobile_phone,
+              sex: registerForm.sex,
+              birthday: registerForm.birthday,
             })
             .then((res: any) => {
               const data = eval(res);
@@ -268,8 +264,7 @@ export default defineComponent({
       });
     }
     const toLogin = () => {
-      register_loading.value = true;
-      this.$router.push({ path: "/login" });
+      router.push({ name: "Login" });
     }
     const sucessTip = () => {
       ElMessage.success({
@@ -287,8 +282,8 @@ export default defineComponent({
       });
     }
 
-    const loginRef = ref()
-    const loginForm = ref({
+    const registerRef = ref()
+    const registerForm = reactive({
       username: "",
       password: "",
       password2: "",
@@ -299,7 +294,7 @@ export default defineComponent({
       sex: "1",
       birthday: ""
     })
-    const loginRules = ref({
+    const registerRules = ref({
         username: [
           {
             validator: checkUsername,
@@ -326,7 +321,7 @@ export default defineComponent({
         ],
         last_name: [{ validator: checkLastName, trigger: "blur" }],
         email: [{ validator: checkEmail, trigger: "blur" }],
-        // sex: [{ validator: checkSex, trigger: "blur" }],
+        sex: [{ validator: checkSex, trigger: "blur" }],
         mobile_phone: [{ validator: checkMobliePhone, trigger: "blur" }],
         birthday: [{ validator: checkBirthday, trigger: "blur" }],
     })
@@ -334,23 +329,25 @@ export default defineComponent({
       (async () =>
       await api.register.register_form(null).then((res: any) => {
         const data = eval(res);
-        loginForm.value.username = data.username;
-        loginForm.value.password = data.password;
-        loginForm.value.first_name = data.first_name;
-        loginForm.value.last_name = data.last_name;
-        loginForm.value.email = data.email;
-        loginForm.value.sex = data.sex;
-        loginForm.value.mobile_phone = data.mobile_phone;
-        loginForm.value.birthday = data.birthday;
+        registerForm.username = data.username;
+        registerForm.password = data.password;
+        registerForm.first_name = data.first_name;
+        registerForm.last_name = data.last_name;
+        registerForm.email = data.email;
+        registerForm.sex = data.sex;
+        registerForm.mobile_phone = data.mobile_phone;
+        registerForm.birthday = data.birthday;
       }))();
     })
     return {
-      loginForm,
-      // sex_checked: 0,
+      registerForm,
+      registerRef,
       message,
       register_button,
       register_loading,
-      loginRules
+      registerRules,
+      onRegister,
+      toLogin
     }
   },
 });

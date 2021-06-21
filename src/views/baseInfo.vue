@@ -14,6 +14,8 @@
         ref="filterTable"
         :data="tableData"
         style="width: 100%"
+        :stripe="stripe"
+        :cell-style="{maxHeight: '10px', overflow: 'hidden'}"
       >
         <el-table-column
           prop="date"
@@ -146,76 +148,89 @@
 
 
 <script lang='ts'>
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import basePage from "./base.vue";
 export default defineComponent({
   name: "baseInfo",
   components: {
     basePage,
   },
-  methods: {
-    handleSizeChange(val: any) {
+  setup() {
+    const currentPage4 = ref(4);
+    const isClose = ref(false);
+    const pageSizes = ref([10, 20, 30, 40, 50]);
+    const currentPageSize = ref(10);
+    const total = ref(0);
+    const stripe = ref(true);
+    const tableData = ref([
+      {
+        date: "2016-05-02",
+        name: "王小虎",
+        address: "上海市普陀区金沙江路 1518 弄",
+        tag: "家",
+      },
+      {
+        date: "2016-05-04",
+        name: "王小虎",
+        address: "上海市普陀区金沙江路 1517 弄",
+        tag: "公司",
+      },
+      {
+        date: "2016-05-01",
+        name: "王小虎",
+        address: "上海市普陀区金沙江路 1519 弄",
+        tag: "家",
+      },
+      {
+        date: "2016-05-03",
+        name: "王小虎",
+        address: "上海市普陀区金沙江路 1516 弄",
+        tag: "公司",
+      },
+    ]);
+    const handleSizeChange = (val: any) => {
       console.log(`每页 ${val} 条`);
-    },
-    handleCurrentChange(val: any) {
+    };
+    const handleCurrentChange = (val: any) => {
       console.log(`当前页: ${val}`);
-    },
+    };
     // resetDateFilter() {
     //   this.$refs.filterTable.clearFilter('date');
     // },
     // clearFilter() {
     //   this.$refs.filterTable.clearFilter();
     // },
-    formatter(row: any, column: any) {
+    const formatter = (row: any, column: any) => {
       return row.address;
-    },
-    filterTag(value: any, row: any) {
+    };
+    const filterTag = (value: any, row: any) => {
       return row.tag === value;
-    },
-    filterHandler(value: any, row: any, column: any) {
+    };
+    const filterHandler = (value: any, row: any, column: any) => {
       const property = column["property"];
       return row[property] === value;
-    },
-    trueClose() {
-      this.isClose = true;
-    },
-    falseClose() {
-      this.isClose = false;
-    },
-  },
-  data() {
+    };
+    const trueClose = () => {
+      isClose.value = true;
+    };
+    const falseClose = () => {
+      isClose.value = false;
+    };
     return {
-      currentPage4: 4,
-      isClose: false,
-      pageSizes: [10, 20, 30, 40, 50],
-      currentPageSize: 10,
-      total: 0,
-      tableData: [
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          tag: "家",
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1517 弄",
-          tag: "公司",
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1519 弄",
-          tag: "家",
-        },
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1516 弄",
-          tag: "公司",
-        },
-      ],
+      currentPage4,
+      isClose,
+      pageSizes,
+      currentPageSize,
+      total,
+      tableData,
+      stripe,
+      trueClose,
+      falseClose,
+      formatter,
+      filterTag,
+      filterHandler,
+      handleSizeChange,
+      handleCurrentChange
     };
   },
 });

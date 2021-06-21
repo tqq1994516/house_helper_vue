@@ -12,7 +12,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('../views/login.vue')
+    component: () => { return import('../views/login.vue')}
   },
   {
     path: '/baseInfo',
@@ -29,15 +29,10 @@ const routes: Array<RouteRecordRaw> = [
     name: '/404',
     component: () => import('../views/404.vue')
   },
-  {
-    path: '/4',
-    name: 'client',
-    component: () => import('../views/client.vue')
-  },
 ]
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(),
   routes
 })
 

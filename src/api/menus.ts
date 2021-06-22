@@ -8,7 +8,7 @@
  const menus = {    
      // 一级菜单列表    
      menus (config:any) {        
-         return instance.get(`${base.bd}/api/menus/`, config);    
+         return instance.get(`${base.bd}/api/menus/menusList/`, config);    
      },
  }
  

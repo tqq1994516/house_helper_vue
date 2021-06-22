@@ -1,14 +1,7 @@
 <template>
   <base-page>
     <template v-slot:main>
-      <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item :to="{ path: '/index' }">首页</el-breadcrumb-item>
-        <el-breadcrumb-item>活动管理</el-breadcrumb-item>
-        <el-breadcrumb-item>活动列表</el-breadcrumb-item>
-        <el-breadcrumb-item>活动详情</el-breadcrumb-item>
-      </el-breadcrumb>
-      <el-button @click="resetDateFilter">清除日期过滤器</el-button>
-      <el-button @click="clearFilter">清除所有过滤器</el-button>
+      <el-button size='small' round icon="el-icon-circle-plus-outline" type="primary" @click="handleAdd" style="margin: 10px 0px">新增用户</el-button>
       <el-table
         row-key="date"
         ref="filterTable"
@@ -16,61 +9,100 @@
         style="width: 100%"
         stripe
         fit
+        border
+        empty-text="暂无数据"
       >
-        <el-table-column type="index" fixed width="20"></el-table-column>
+        <!-- <el-table-column
+          type="index"
+          fixed
+          width="50"
+          label="序号"
+          header-align="center"
+          align="center"
+          :index="index"
+        >
+        </el-table-column> -->
         <el-table-column
           prop="true_name"
           label="客户姓名"
           width="180"
+          header-align="center"
+          align="center"
         ></el-table-column>
         <el-table-column
           prop="email"
           label="邮箱"
           width="180"
+          header-align="center"
+          align="center"
         ></el-table-column>
-        <el-table-column prop="sex" label="性别" width="50"></el-table-column>
+        <el-table-column
+          prop="sex"
+          label="性别"
+          width="50"
+          header-align="center"
+          align="center"
+        ></el-table-column>
         <el-table-column
           prop="mobile_phone"
           label="手机号"
           width="180"
+          header-align="center"
+          align="center"
         ></el-table-column>
         <el-table-column
           prop="birthday"
           label="出生日期"
           width="180"
+          header-align="center"
+          align="center"
         ></el-table-column>
         <el-table-column
           prop="address"
           label="现住地"
           width="250"
+          header-align="center"
         ></el-table-column>
-        <el-table-column prop="tag" label="标签">
+        <el-table-column prop="tag" label="标签" header-align="center">
           <template #default="scope">
             <template v-for="i in scope.row.tag" :key="i">
               <el-tag
-              type="primary"
-              :closable="isClose"
-              @mouseenter="trueClose"
-              @mouseleave="falseClose"
-              >{{ i.name }}</el-tag
-            >
+                type="primary"
+                :closable="isClose"
+                >{{ i }}</el-tag
+              >
             </template>
           </template>
         </el-table-column>
-        <el-table-column fixed="right" label="操作" width="100">
+        <el-table-column
+          fixed="right"
+          label="操作"
+          width="100"
+          header-align="center"
+          align="center"
+        >
           <template #default="scope">
-            <el-button @click="handleClick(scope.row)" type="text" size="small"
+            <el-button
+              @click="handleView(scope.row.id)"
+              type="text"
+              size="small"
               >查看</el-button
             >
-            <el-button type="text" size="small">编辑</el-button>
+            <el-button
+              @click="handleEdit(scope.row.id)"
+              type="text"
+              size="small"
+              >编辑</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
-      <div class="block" type="flex" justify="space-around" align="middle">
+      <div type="flex" justify="space-around" align="middle">
         <el-pagination
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          :current-page="currentPage4"
+          :current-page="currentPage"
+          :page-count="page_total"
           :page-sizes="pageSizes"
           :page-size="currentPageSize"
           layout="total, sizes, prev, pager, next, jumper"
@@ -83,7 +115,8 @@
 
 
 <script lang='ts'>
-import { defineComponent, ref } from "vue";
+import api from "@/api/api";
+import { defineComponent, onMounted, reactive, ref } from "vue";
 import basePage from "./base.vue";
 export default defineComponent({
   name: "baseInfo",
@@ -91,64 +124,99 @@ export default defineComponent({
     basePage,
   },
   setup() {
-    const currentPage4 = ref(4);
+    const currentPage = ref(1);
     const isClose = ref(false);
     const pageSizes = ref([10, 20, 30, 40, 50]);
     const currentPageSize = ref(10);
     const total = ref(0);
-    const tableData = ref([
-      {
-        true_name: "",
-        email: "",
-        sex: "",
-        mobile_phone: "",
-        birthday: "",
-        address: "",
-        tag: [],
-      },
-    ]);
+    const tableData = ref();
+    const page_total = ref(0);
+    const tagSet = ref<any[]>();
+    const handleView = (id: any) => {};
+    const handleEdit = (id: any) => {};
     const handleSizeChange = (val: any) => {
-      console.log(`每页 ${val} 条`);
+      api.baseInfo.baseInfo({ params: { size: val } }).then((res: any) => {
+        const data = eval(res.data);
+        tableData.value = data.results;
+        total.value = data.total;
+        page_total.value = data.page_total;
+        setTag();
+      });
     };
     const handleCurrentChange = (val: any) => {
-      console.log(`当前页: ${val}`);
+      api.baseInfo
+        .baseInfo({ params: { size: currentPageSize.value, page: val } })
+        .then((res: any) => {
+          const data = eval(res.data);
+          tableData.value = data.results;
+          total.value = data.total;
+          page_total.value = data.page_total;
+          setTag();
+        });
     };
+    const setTag = () => {
+      for (let i in tableData.value) {
+        // tagSet.value.length = 0
+        const params = tableData.value[i].id;
+        api.tag
+          .tag({ params: { customer_name_id: params } })
+          .then((res: any) => {
+            const data = eval(res.data);
+            const tagList: any[] = [];
+            for (let i in data.results) {
+              tagList.push(data.results[i].tag_name);
+            }
+            for (let i in tableData.value){
+              if (tableData.value[i].id == params){
+                tableData.value[i].tag = tagList
+              }
+            }
+            console.log(tableData.value)
+          });
+      }
+    };
+    const handleAdd = () => {
+      
+    }
     // resetDateFilter() {
     //   this.$refs.filterTable.clearFilter('date');
     // },
     // clearFilter() {
     //   this.$refs.filterTable.clearFilter();
     // },
-    const formatter = (row: any, column: any) => {
-      return row.address;
-    };
-    const filterTag = (value: any, row: any) => {
-      return row.tag === value;
-    };
-    const filterHandler = (value: any, row: any, column: any) => {
-      const property = column["property"];
-      return row[property] === value;
-    };
     const trueClose = () => {
       isClose.value = true;
     };
     const falseClose = () => {
       isClose.value = false;
     };
+    onMounted(() => {
+      (async () =>
+        await api.baseInfo
+          .baseInfo({ params: { size: currentPageSize.value } })
+          .then((res: any) => {
+            const data = eval(res.data);
+            tableData.value = data.results;
+            total.value = data.total;
+            page_total.value = data.page_total;
+            setTag();
+          }))();
+    });
     return {
-      currentPage4,
+      currentPage,
       isClose,
       pageSizes,
       currentPageSize,
       total,
       tableData,
+      tagSet,
       trueClose,
       falseClose,
-      formatter,
-      filterTag,
-      filterHandler,
       handleSizeChange,
       handleCurrentChange,
+      handleView,
+      handleEdit,
+      handleAdd,
     };
   },
 });

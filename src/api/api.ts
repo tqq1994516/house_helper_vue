@@ -5,6 +5,8 @@
 import menus from '@/api/menus';
 import login from '@/api/login';
 import register from '@/api/register';
+import baseInfo from '@/api/baseInfo';
+import tag from '@/api/tag';
 // 其他模块的接口……
 
 // 导出接口
@@ -12,5 +14,7 @@ export default {
     menus,
     login,
     register,
+    baseInfo,
+    tag,
     // ……
 }

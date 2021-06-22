@@ -18,11 +18,11 @@
     <el-container>
       <el-aside>
         <el-menu
-          :default-active="activeIndex"
+          :default-active="this.$route.path"
           @open="handleOpen"
           @close="handleClose"
           :collapse="isCollapse"
-          :router="isRouter"
+          router
           ref="asideMenu"
         >
           <template v-for="value in menus_list" :key="value.id">
@@ -63,9 +63,9 @@
                         <template
                           v-if="v.parent_id == val.id && v.hierarchy == 3"
                         >
-                          <el-menu-it :index="v.to_path">
+                          <el-menu-item :index="v.to_path">
                             {{ v.name }}
-                          </el-menu-it>
+                          </el-menu-item>
                         </template>
                       </template>
                     </el-submenu>
@@ -86,7 +86,15 @@
       </el-aside>
       <el-container>
         <el-main>
+          <el-breadcrumb separator-class="el-icon-arrow-right">
+            <template v-for="i in breadcrumbs" :key="i">
+              <el-breadcrumb-item :to="{ path: i.to_path }"
+                >{{ i.name }}</el-breadcrumb-item
+              >
+            </template>
+          </el-breadcrumb>
           <slot name="main"></slot>
+          <slot name="details"></slot>
         </el-main>
         <el-footer style="text-align: center">**致每一位房产经理人**</el-footer>
       </el-container>
@@ -97,33 +105,58 @@
 <script lang="ts">
 import api from "@/api/api";
 import { defineComponent, ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
 export default defineComponent({
   name: "basePage",
-  setup(){
-      const isCollapse = ref(false)
-      const menus_count = ref(0)
-      const menus_list = ref(null)
-      const activeIndex = ref("1")
-      const isRouter = ref(true)
-      const handleOpen = (key: string, keyPath: string) => {}
-      const handleClose = (key: string, keyPath: string) => {}
-      onMounted(() => {
+  setup() {
+    const route = useRoute();
+    const isCollapse = ref(false);
+    const menus_count = ref(0);
+    const menus_list = ref();
+    const handleOpen = (key: string, keyPath: string) => {};
+    const handleClose = (key: string, keyPath: string) => {};
+    const breadcrumbs = ref();
+    const setBreadcrumbs = () => {
+      for (let i in menus_list.value) {
+        if (menus_list.value[i].to_path == route.path) {
+          breadcrumbs.value = [
+            {
+              id: menus_list.value[i].id,
+              name: menus_list.value[i].name,
+              path: menus_list.value[i].to_path,
+              parent_id: menus_list.value[i].parent_id,
+            },
+          ];
+        }
+      }
+      for (let x in menus_list.value) {
+        for (let y in breadcrumbs.value) {
+          if (breadcrumbs.value[y].parent_id == menus_list.value[x].id) {
+            breadcrumbs.value.unshift({
+              id: menus_list.value[x].id,
+              name: menus_list.value[x].name,
+              path: menus_list.value[x].to_path,
+              parent_id: menus_list.value[x].parent_id,
+            });
+          }
+        }
+      }
+    };
+    onMounted(() => {
       (async () =>
-      await api.menus
-        .menus(null)
-        .then((res: any) => {
+        await api.menus.menus(null).then((res: any) => {
           menus_count.value = res.data.length - 1;
           menus_list.value = eval(res.data);
-          activeIndex.value = res.data[res.data.length - 1].activeIndex;
-        }))()});
+          setBreadcrumbs();
+        }))();
+    });
     return {
       isCollapse,
       menus_count,
       menus_list,
-      activeIndex,
-      isRouter,
+      breadcrumbs,
     };
-  }
+  },
 });
 </script>
 

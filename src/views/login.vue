@@ -57,7 +57,7 @@ import { ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
 export default defineComponent({
   name: "login",
-  setup (){
+  setup() {
     const router = useRouter();
     const checkUsername = (rule: any, value: any, callback: any) => {
       if (!value) {
@@ -84,17 +84,17 @@ export default defineComponent({
       }
     };
     const loginForm = reactive({
-      username:"",
-      password:"",
-    })
-    const loginRef = ref()
+      username: "",
+      password: "",
+    });
+    const loginRef = ref();
     const loginRules = ref({
-        username: [{ validate: checkUsername, trigger: "blur" }],
-        password: [{ validate: checkPassword, trigger: "blur" }],
-      })
-    const message = ref("")
-    const login_button = ref(false)
-    const login_loading = ref(false)
+      username: [{ validate: checkUsername, trigger: "blur" }],
+      password: [{ validate: checkPassword, trigger: "blur" }],
+    });
+    const message = ref("");
+    const login_button = ref(false);
+    const login_loading = ref(false);
     const onLogin = () => {
       unref(loginRef).validate((valid: any) => {
         if (valid) {
@@ -115,14 +115,14 @@ export default defineComponent({
             });
         }
       });
-    }
+    };
     const toRegister = () => {
       router.push({ path: "/register" });
-    }
+    };
     const toIndex = () => {
       login_loading.value = true;
       router.push({ path: "/index" });
-    }
+    };
     const sucessTip = () => {
       ElMessage.success({
         message: message.value,
@@ -130,38 +130,37 @@ export default defineComponent({
         center: true,
         onClose: toIndex,
       });
-    }
+    };
     const failTip = () => {
       ElMessage.error({
         message: message.value,
         type: "error",
         center: true,
       });
-    }
+    };
     const login_btn_true = () => {
       login_button.value = true;
-    }
+    };
     const login_btn_false = () => {
       login_button.value = false;
-    }
-    onMounted(() =>{
-    (async () =>
-      await api.login.login_form(null).then((res: any) => {
-        loginForm.username = eval(res.data.username);
-        loginForm.password = eval(res.data.password);
-      }))();
-    },)
-  return {
+    };
+    onMounted(() => {
+      (() =>
+        api.login.login_form(null).then((res: any) => {
+          loginForm.username = eval(res.data.username);
+          loginForm.password = eval(res.data.password);
+        }))();
+    });
+    return {
       loginForm,
-      rules: 
-      message,
+      rules: message,
       login_button,
       login_loading,
       toRegister,
       toIndex,
       onLogin,
       loginRules,
-      loginRef
+      loginRef,
     };
   },
 });

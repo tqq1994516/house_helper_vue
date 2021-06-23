@@ -2,7 +2,7 @@
   <el-container>
     <el-main>
       <el-row type="flex" justify="center" align="middle">
-        <el-col span=12 offset=6>
+        <el-col span="12" offset="6">
           <el-form
             ref="registerRef"
             :model="registerForm"
@@ -104,20 +104,20 @@ import { ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
 export default defineComponent({
   name: "register",
-  setup(){
+  setup() {
     const router = useRouter();
     const reg_chinese = /[\u4e00-\u9fa5]/;
     const reg_email = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
     const reg_mobile_phone = /^1[356789]\d{9}$/;
-    const register_button = ref(false)
-    const message = ref("")
-    const register_loading = ref(false)
+    const register_button = ref(false);
+    const message = ref("");
+    const register_loading = ref(false);
     const register_btn_true = () => {
       register_button.value = true;
-    }
+    };
     const register_btn_false = () => {
       register_button.value = false;
-    }
+    };
 
     const checkUsername = (rule: any, value: any, callback: any) => {
       if (!value) {
@@ -262,10 +262,10 @@ export default defineComponent({
           register_btn_true();
         }
       });
-    }
+    };
     const toLogin = () => {
       router.push({ name: "Login" });
-    }
+    };
     const sucessTip = () => {
       ElMessage.success({
         message: message.value,
@@ -273,16 +273,16 @@ export default defineComponent({
         center: true,
         onClose: toLogin,
       });
-    }
+    };
     const failTip = () => {
       ElMessage.error({
         message: message.value,
         type: "error",
         center: true,
       });
-    }
+    };
 
-    const registerRef = ref()
+    const registerRef = ref();
     const registerForm = reactive({
       username: "",
       password: "",
@@ -292,53 +292,53 @@ export default defineComponent({
       email: "",
       mobile_phone: "",
       sex: "1",
-      birthday: ""
-    })
+      birthday: "",
+    });
     const registerRules = ref({
-        username: [
-          {
-            validator: checkUsername,
-            trigger: "blur",
-          },
-        ],
-        password: [
-          {
-            validator: checkPassword,
-            trigger: "blur",
-          },
-        ],
-        password2: [
-          {
-            validator: checkPassword2,
-            trigger: "blur",
-          },
-        ],
-        first_name: [
-          {
-            validator: checkFirstName,
-            trigger: "blur",
-          },
-        ],
-        last_name: [{ validator: checkLastName, trigger: "blur" }],
-        email: [{ validator: checkEmail, trigger: "blur" }],
-        sex: [{ validator: checkSex, trigger: "blur" }],
-        mobile_phone: [{ validator: checkMobliePhone, trigger: "blur" }],
-        birthday: [{ validator: checkBirthday, trigger: "blur" }],
-    })
+      username: [
+        {
+          validator: checkUsername,
+          trigger: "blur",
+        },
+      ],
+      password: [
+        {
+          validator: checkPassword,
+          trigger: "blur",
+        },
+      ],
+      password2: [
+        {
+          validator: checkPassword2,
+          trigger: "blur",
+        },
+      ],
+      first_name: [
+        {
+          validator: checkFirstName,
+          trigger: "blur",
+        },
+      ],
+      last_name: [{ validator: checkLastName, trigger: "blur" }],
+      email: [{ validator: checkEmail, trigger: "blur" }],
+      sex: [{ validator: checkSex, trigger: "blur" }],
+      mobile_phone: [{ validator: checkMobliePhone, trigger: "blur" }],
+      birthday: [{ validator: checkBirthday, trigger: "blur" }],
+    });
     onMounted(() => {
-      (async () =>
-      await api.register.register_form(null).then((res: any) => {
-        const data = eval(res);
-        registerForm.username = data.username;
-        registerForm.password = data.password;
-        registerForm.first_name = data.first_name;
-        registerForm.last_name = data.last_name;
-        registerForm.email = data.email;
-        registerForm.sex = data.sex;
-        registerForm.mobile_phone = data.mobile_phone;
-        registerForm.birthday = data.birthday;
-      }))();
-    })
+      (() =>
+        api.register.register_form(null).then((res: any) => {
+          const data = eval(res);
+          registerForm.username = data.username;
+          registerForm.password = data.password;
+          registerForm.first_name = data.first_name;
+          registerForm.last_name = data.last_name;
+          registerForm.email = data.email;
+          registerForm.sex = data.sex;
+          registerForm.mobile_phone = data.mobile_phone;
+          registerForm.birthday = data.birthday;
+        }))();
+    });
     return {
       registerForm,
       registerRef,
@@ -347,8 +347,8 @@ export default defineComponent({
       register_loading,
       registerRules,
       onRegister,
-      toLogin
-    }
+      toLogin,
+    };
   },
 });
 </script>

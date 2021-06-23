@@ -1,7 +1,16 @@
 <template>
   <base-page>
-    <template v-slot:main>
-      <el-button size='small' round icon="el-icon-circle-plus-outline" type="primary" @click="handleAdd" style="margin: 10px 0px">新增用户</el-button>
+    <template #main>
+      <slot :title="title"></slot>
+      <el-button
+        size="small"
+        round
+        icon="el-icon-circle-plus-outline"
+        type="primary"
+        @click="handleAdd"
+        style="margin: 10px 0px"
+        >新增用户</el-button
+      >
       <el-table
         row-key="date"
         ref="filterTable"
@@ -66,11 +75,7 @@
         <el-table-column prop="tag" label="标签" header-align="center">
           <template #default="scope">
             <template v-for="i in scope.row.tag" :key="i">
-              <el-tag
-                type="primary"
-                :closable="isClose"
-                >{{ i }}</el-tag
-              >
+              <el-tag type="primary" :closable="isClose">{{ i }}</el-tag>
             </template>
           </template>
         </el-table-column>
@@ -116,7 +121,8 @@
 
 <script lang='ts'>
 import api from "@/api/api";
-import { defineComponent, onMounted, reactive, ref } from "vue";
+import { defineComponent, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import basePage from "./base.vue";
 export default defineComponent({
   name: "baseInfo",
@@ -124,6 +130,8 @@ export default defineComponent({
     basePage,
   },
   setup() {
+    const router = useRouter();
+    const title = ref("");
     const currentPage = ref(1);
     const isClose = ref(false);
     const pageSizes = ref([10, 20, 30, 40, 50]);
@@ -166,18 +174,20 @@ export default defineComponent({
             for (let i in data.results) {
               tagList.push(data.results[i].tag_name);
             }
-            for (let i in tableData.value){
-              if (tableData.value[i].id == params){
-                tableData.value[i].tag = tagList
+            for (let i in tableData.value) {
+              if (tableData.value[i].id == params) {
+                tableData.value[i].tag = tagList;
               }
             }
-            console.log(tableData.value)
           });
       }
     };
     const handleAdd = () => {
-      
-    }
+      title.value = "新增用户";
+      router.push({
+        name: "BaseInfoDetails",
+      });
+    };
     // resetDateFilter() {
     //   this.$refs.filterTable.clearFilter('date');
     // },
@@ -191,8 +201,8 @@ export default defineComponent({
       isClose.value = false;
     };
     onMounted(() => {
-      (async () =>
-        await api.baseInfo
+      (() =>
+        api.baseInfo
           .baseInfo({ params: { size: currentPageSize.value } })
           .then((res: any) => {
             const data = eval(res.data);

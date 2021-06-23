@@ -88,13 +88,15 @@
         <el-main>
           <el-breadcrumb separator-class="el-icon-arrow-right">
             <template v-for="i in breadcrumbs" :key="i">
-              <el-breadcrumb-item :to="{ path: i.to_path }"
-                >{{ i.name }}</el-breadcrumb-item
-              >
+              <el-breadcrumb-item :to="{ path: i.to_path }">{{
+                i.name
+              }}</el-breadcrumb-item>
             </template>
           </el-breadcrumb>
-          <slot name="main"></slot>
-          <slot name="details"></slot>
+          <slot name="main">
+            <template> #default="main"</template>
+          </slot>
+          <slot name="details">{{ main.title }}</slot>
         </el-main>
         <el-footer style="text-align: center">**致每一位房产经理人**</el-footer>
       </el-container>
@@ -111,6 +113,7 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const isCollapse = ref(false);
+    const title = ref("");
     const menus_count = ref(0);
     const menus_list = ref();
     const handleOpen = (key: string, keyPath: string) => {};
@@ -143,8 +146,8 @@ export default defineComponent({
       }
     };
     onMounted(() => {
-      (async () =>
-        await api.menus.menus(null).then((res: any) => {
+      (() =>
+        api.menus.menus(null).then((res: any) => {
           menus_count.value = res.data.length - 1;
           menus_list.value = eval(res.data);
           setBreadcrumbs();
@@ -155,6 +158,7 @@ export default defineComponent({
       menus_count,
       menus_list,
       breadcrumbs,
+      title,
     };
   },
 });

@@ -1,14 +1,13 @@
 <template>
-  <base-page>
+  <base-page :title="title">
     <template #main>
-      <slot :title="title"></slot>
       <el-button
         size="small"
         round
         icon="el-icon-circle-plus-outline"
         type="primary"
         @click="handleAdd"
-        style="margin: 10px 0px"
+        style="margin: 10px"
         >新增用户</el-button
       >
       <el-table
@@ -21,7 +20,7 @@
         border
         empty-text="暂无数据"
       >
-        <!-- <el-table-column
+        <el-table-column
           type="index"
           fixed
           width="50"
@@ -30,7 +29,7 @@
           align="center"
           :index="index"
         >
-        </el-table-column> -->
+        </el-table-column>
         <el-table-column
           prop="true_name"
           label="客户姓名"
@@ -130,8 +129,8 @@ export default defineComponent({
     basePage,
   },
   setup() {
+    const title = ref("")
     const router = useRouter();
-    const title = ref("");
     const currentPage = ref(1);
     const isClose = ref(false);
     const pageSizes = ref([10, 20, 30, 40, 50]);
@@ -143,6 +142,7 @@ export default defineComponent({
     const handleView = (id: any) => {};
     const handleEdit = (id: any) => {};
     const handleSizeChange = (val: any) => {
+      currentPageSize.value = val
       api.baseInfo.baseInfo({ params: { size: val } }).then((res: any) => {
         const data = eval(res.data);
         tableData.value = data.results;
@@ -152,6 +152,7 @@ export default defineComponent({
       });
     };
     const handleCurrentChange = (val: any) => {
+      currentPage.value = val
       api.baseInfo
         .baseInfo({ params: { size: currentPageSize.value, page: val } })
         .then((res: any) => {
@@ -182,8 +183,12 @@ export default defineComponent({
           });
       }
     };
+    const index = (row:any) => {
+      const index = (currentPage.value - 1) * currentPageSize.value + row + 1
+      return index
+    }
     const handleAdd = () => {
-      title.value = "新增用户";
+      // title.value = "新增用户";
       router.push({
         name: "BaseInfoDetails",
       });
@@ -220,6 +225,7 @@ export default defineComponent({
       total,
       tableData,
       tagSet,
+      title,
       trueClose,
       falseClose,
       handleSizeChange,
@@ -227,6 +233,7 @@ export default defineComponent({
       handleView,
       handleEdit,
       handleAdd,
+      index,
     };
   },
 });

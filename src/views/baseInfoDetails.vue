@@ -1,7 +1,10 @@
 <template>
   <base-page>
-    <template #details>
-      <el-page-header icon="el-icon-arrow-left" :content="title"></el-page-header>
+    <template #details="details">
+        <el-page-header
+          icon="el-icon-arrow-left"
+          :content="details.title"
+        ></el-page-header>
     </template>
   </base-page>
 </template>
@@ -17,7 +20,7 @@ export default defineComponent({
     basePage,
   },
   setup() {
-    const title = ref("")
+    const title = ref("");
     const isClose = ref(false);
     const trueClose = () => {
       isClose.value = true;

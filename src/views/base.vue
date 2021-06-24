@@ -93,10 +93,8 @@
               }}</el-breadcrumb-item>
             </template>
           </el-breadcrumb>
-          <slot name="main">
-            <template> #default="main"</template>
-          </slot>
-          <slot name="details">{{ main.title }}</slot>
+          <slot name="main"></slot>
+          <slot name="details" :title="title"></slot>
         </el-main>
         <el-footer style="text-align: center">**致每一位房产经理人**</el-footer>
       </el-container>
@@ -110,10 +108,13 @@ import { defineComponent, ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 export default defineComponent({
   name: "basePage",
-  setup() {
+  props: {
+    title: { type: String, default: "" },
+  },
+  setup(props, context) {
     const route = useRoute();
     const isCollapse = ref(false);
-    const title = ref("");
+    const title = props.title;
     const menus_count = ref(0);
     const menus_list = ref();
     const handleOpen = (key: string, keyPath: string) => {};

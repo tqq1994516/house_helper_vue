@@ -1,7 +1,7 @@
 <template>
   <el-container>
     <el-header>
-      <el-row :gutter="10" justify="center" align="middle">
+      <el-row type="flex" justify="center" align="middle">
         <el-col :span="2">
           <img src="" alt="" />
           <p>房产助手</p>
@@ -104,14 +104,19 @@
 
 <script lang="ts">
 import api from "@/api/api";
-import { defineComponent, ref, onMounted } from "vue";
+import { defineComponent, ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
+import $store from "../store/index";
 export default defineComponent({
   name: "basePage",
   props: {
     title: { type: String, default: "" },
+    details: { type: Object, default: null },
   },
   setup(props, context) {
+    let detailsType = computed(() => {
+      return $store.state.type
+    })
     const route = useRoute();
     const isCollapse = ref(false);
     const title = props.title;

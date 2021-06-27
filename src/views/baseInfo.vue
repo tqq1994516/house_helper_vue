@@ -1,5 +1,5 @@
 <template>
-  <base-page :title="title">
+  <base-page>
     <template #main>
       <el-button
         size="small"
@@ -120,16 +120,16 @@
 
 <script lang='ts'>
 import api from "@/api/api";
-import { defineComponent, onMounted, ref } from "vue";
+import { computed, defineComponent, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import basePage from "./base.vue";
+import $store from "../store/index";
 export default defineComponent({
   name: "baseInfo",
   components: {
     basePage,
   },
   setup() {
-    const title = ref("")
     const router = useRouter();
     const currentPage = ref(1);
     const isClose = ref(false);
@@ -139,10 +139,16 @@ export default defineComponent({
     const tableData = ref();
     const page_total = ref(0);
     const tagSet = ref<any[]>();
-    const handleView = (id: any) => {};
-    const handleEdit = (id: any) => {};
+    const handleView = async (id: any) => {
+      await $store.dispatch("setType", "view");
+      router.push({ name: "BaseInfoDetails", query: { id: id } });
+    };
+    const handleEdit = async (id: any) => {
+      await $store.dispatch("setType", "edit");
+      router.push({ name: "BaseInfoDetails", query: { id: id } });
+    };
     const handleSizeChange = (val: any) => {
-      currentPageSize.value = val
+      currentPageSize.value = val;
       api.baseInfo.baseInfo({ params: { size: val } }).then((res: any) => {
         const data = eval(res.data);
         tableData.value = data.results;
@@ -152,7 +158,7 @@ export default defineComponent({
       });
     };
     const handleCurrentChange = (val: any) => {
-      currentPage.value = val
+      currentPage.value = val;
       api.baseInfo
         .baseInfo({ params: { size: currentPageSize.value, page: val } })
         .then((res: any) => {
@@ -183,22 +189,16 @@ export default defineComponent({
           });
       }
     };
-    const index = (row:any) => {
-      const index = (currentPage.value - 1) * currentPageSize.value + row + 1
-      return index
-    }
-    const handleAdd = () => {
-      // title.value = "新增用户";
+    const index = (row: any) => {
+      const index = (currentPage.value - 1) * currentPageSize.value + row + 1;
+      return index;
+    };
+    const handleAdd = async () => {
+      await $store.dispatch("setType", "add");
       router.push({
         name: "BaseInfoDetails",
       });
     };
-    // resetDateFilter() {
-    //   this.$refs.filterTable.clearFilter('date');
-    // },
-    // clearFilter() {
-    //   this.$refs.filterTable.clearFilter();
-    // },
     const trueClose = () => {
       isClose.value = true;
     };
@@ -225,7 +225,6 @@ export default defineComponent({
       total,
       tableData,
       tagSet,
-      title,
       trueClose,
       falseClose,
       handleSizeChange,

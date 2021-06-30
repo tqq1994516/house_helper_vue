@@ -255,7 +255,11 @@ export default defineComponent({
             })
             .catch((res: any) => {
               const data = eval(res);
-              message.value = data.data.message;
+              if (data.data.message){
+                message.value = data.message;
+              }else{
+                message.value = data.data
+              }
               failTip();
             });
         } else {
